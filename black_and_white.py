@@ -1,34 +1,61 @@
+import math
+
 import pygame
 
 pygame.init()
 
 FPS = 60
-clock = pygame.time.Clock()
-
 W, H = 640, 480
 
+clock = pygame.time.Clock()
 display = pygame.display.set_mode((W, H))
 
-# cube = pygame.draw.rect(display, (0, 255, 0), [640//2, 480//2, 10, 10])
-x = 100
-y = 100
-while True:
-    clock.tick(FPS)
 
+class Cube:
+    def __init__(self, w=10, h=10, speed=2):
+        self.w, self.h = w, h
+        self.x, self.y = W // 2, H // 2
+        self.angle = 0
+        self.speed = speed
+
+    @property
+    def pos(self):
+        return self.x, self.y
+
+    def movement(self):
+        sin_a = math.sin(self.angle)
+        cos_a = math.cos(self.angle)
+        key = pygame.key.get_pressed()
+        if key[pygame.K_w]:
+            self.x += self.speed * cos_a
+            self.y += self.speed * sin_a
+        elif key[pygame.K_s]:
+            self.x += -self.speed * cos_a
+            self.y += -self.speed * sin_a
+        elif key[pygame.K_a]:
+            self.x += self.speed * sin_a
+            self.y += -self.speed * cos_a
+        elif key[pygame.K_d]:
+            self.x += -self.speed * sin_a
+            self.y += self.speed * cos_a
+        elif key[pygame.K_LEFT]:
+            self.angle -= 0.02
+        elif key[pygame.K_RIGHT]:
+            self.angle += 0.02
+
+
+cube = Cube()
+
+while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             exit()
-    key = pygame.key.get_pressed()
-    cube = pygame.rect.Rect(x, y, 10, 10)
-    if key[pygame.K_LEFT] and cube.left > 0:
-        x -= 2
-    elif key[pygame.K_RIGHT] and cube.right < W:
-        x += 2
-    elif key[pygame.K_UP] and cube.top > 0:
-        y -= 2
-    elif key[pygame.K_DOWN] and cube.bottom < H:
-        y += 2
+    cube.movement()
 
     display.fill((0, 0, 0))
-    pygame.draw.rect(display, (0, 255, 0), cube)
+    pygame.draw.rect(display, (0, 255, 0), (cube.pos[0], cube.pos[1], cube.w, cube.h))
+    pygame.draw.line(display, (0, 255, 0), cube.pos, (cube.x + W * math.cos(cube.angle),
+                                                      cube.y + W * math.sin(cube.angle)))
+
     pygame.display.update()
+    clock.tick(FPS)
